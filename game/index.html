@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>海と大陸の旅 — RPG</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #020c1e;
+      overflow: hidden;
+      font-family: 'Georgia', serif;
+    }
+    canvas { display: block; }
+
+    /* Loading screen */
+    #loading {
+      position: fixed; inset: 0;
+      background: #020c1e;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 1000;
+      transition: opacity 1s ease;
+    }
+    #loading h1 {
+      color: #c8a84b;
+      font-size: 2.4em;
+      letter-spacing: 0.15em;
+      text-shadow: 0 0 30px rgba(200,168,75,0.6);
+      margin-bottom: 12px;
+    }
+    #loading p {
+      color: #6a8ab0;
+      font-size: 1em;
+      letter-spacing: 0.1em;
+      margin-bottom: 40px;
+    }
+    #loading-bar-wrap {
+      width: 280px; height: 4px;
+      background: #1a2a4a;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    #loading-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #2a5fa8, #c8a84b);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+    #loading-tip {
+      color: #445566;
+      font-size: 0.85em;
+      margin-top: 24px;
+      max-width: 320px;
+      text-align: center;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading">
+  <h1>海と大陸の旅</h1>
+  <p>〜 自由なる探索の物語 〜</p>
+  <div id="loading-bar-wrap">
+    <div id="loading-bar"></div>
+  </div>
+  <p id="loading-tip">世界を生成しています…</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+<script type="module">
+  // Animate the loading bar while Phaser initialises
+  const bar = document.getElementById('loading-bar');
+  const tip = document.getElementById('loading-tip');
+  const tips = [
+    '世界を生成しています…',
+    '海流を計算しています…',
+    '大陸の輪郭を描いています…',
+    '森と山々を配置しています…',
+    '港を探しています…',
+    '旅立ちの準備をしています…',
+  ];
+  let pct = 0, ti = 0;
+  const interval = setInterval(() => {
+    pct = Math.min(pct + Math.random() * 18, 95);
+    bar.style.width = pct + '%';
+    if (ti < tips.length) { tip.textContent = tips[ti++]; }
+  }, 300);
+
+  // Dynamically import the game after Phaser is loaded
+  import('./src/main.js').then(() => {
+    clearInterval(interval);
+    bar.style.width = '100%';
+    setTimeout(() => {
+      const loading = document.getElementById('loading');
+      loading.style.opacity = '0';
+      setTimeout(() => loading.remove(), 1000);
+    }, 400);
+  }).catch(err => {
+    tip.textContent = 'エラー: ' + err.message;
+    console.error(err);
+  });
+</script>
+</body>
+</html>
