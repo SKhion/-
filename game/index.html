@@ -6,102 +6,586 @@
   <title>海と大陸の旅 — RPG</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #020c1e;
-      overflow: hidden;
-      font-family: 'Georgia', serif;
-    }
+    body { background: #020c1e; overflow: hidden; font-family: Georgia, serif; }
     canvas { display: block; }
-
-    /* Loading screen */
     #loading {
-      position: fixed; inset: 0;
-      background: #020c1e;
+      position: fixed; inset: 0; background: #020c1e;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      z-index: 1000;
-      transition: opacity 1s ease;
+      z-index: 1000; transition: opacity 1s ease;
     }
     #loading h1 {
-      color: #c8a84b;
-      font-size: 2.4em;
-      letter-spacing: 0.15em;
-      text-shadow: 0 0 30px rgba(200,168,75,0.6);
-      margin-bottom: 12px;
+      color: #c8a84b; font-size: 2.4em; letter-spacing: 0.15em;
+      text-shadow: 0 0 30px rgba(200,168,75,0.6); margin-bottom: 12px;
     }
-    #loading p {
-      color: #6a8ab0;
-      font-size: 1em;
-      letter-spacing: 0.1em;
-      margin-bottom: 40px;
-    }
-    #loading-bar-wrap {
-      width: 280px; height: 4px;
-      background: #1a2a4a;
-      border-radius: 2px;
-      overflow: hidden;
-    }
+    #loading p { color: #6a8ab0; font-size: 1em; letter-spacing: 0.1em; margin-bottom: 40px; }
+    #loading-bar-wrap { width: 280px; height: 4px; background: #1a2a4a; border-radius: 2px; overflow: hidden; }
     #loading-bar {
-      height: 100%;
-      background: linear-gradient(90deg, #2a5fa8, #c8a84b);
-      width: 0%;
-      transition: width 0.3s ease;
-      border-radius: 2px;
+      height: 100%; background: linear-gradient(90deg, #2a5fa8, #c8a84b);
+      width: 0%; transition: width 0.3s ease; border-radius: 2px;
     }
-    #loading-tip {
-      color: #445566;
-      font-size: 0.85em;
-      margin-top: 24px;
-      max-width: 320px;
-      text-align: center;
-      font-style: italic;
-    }
+    #loading-tip { color: #445566; font-size: 0.85em; margin-top: 24px; max-width: 320px; text-align: center; font-style: italic; }
   </style>
 </head>
 <body>
-
 <div id="loading">
   <h1>海と大陸の旅</h1>
   <p>〜 自由なる探索の物語 〜</p>
-  <div id="loading-bar-wrap">
-    <div id="loading-bar"></div>
-  </div>
+  <div id="loading-bar-wrap"><div id="loading-bar"></div></div>
   <p id="loading-tip">世界を生成しています…</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
-<script type="module">
-  // Animate the loading bar while Phaser initialises
-  const bar = document.getElementById('loading-bar');
-  const tip = document.getElementById('loading-tip');
-  const tips = [
-    '世界を生成しています…',
-    '海流を計算しています…',
-    '大陸の輪郭を描いています…',
-    '森と山々を配置しています…',
-    '港を探しています…',
-    '旅立ちの準備をしています…',
-  ];
-  let pct = 0, ti = 0;
-  const interval = setInterval(() => {
-    pct = Math.min(pct + Math.random() * 18, 95);
-    bar.style.width = pct + '%';
-    if (ti < tips.length) { tip.textContent = tips[ti++]; }
-  }, 300);
+<script>
+// ─── Noise Utils ────────────────────────────────────────────────────────────
+class SimplexNoise {
+  constructor(seed) {
+    seed = seed === undefined ? Math.random() : seed;
+    this.p = new Uint8Array(256);
+    this.perm = new Uint8Array(512);
+    this.permMod12 = new Uint8Array(512);
+    let s = (seed * 2147483647) | 0;
+    for (let i = 0; i < 256; i++) { s = (s * 16807) % 2147483647; this.p[i] = i; }
+    for (let i = 255; i > 0; i--) {
+      s = (s * 16807) % 2147483647;
+      const j = ((s % (i + 1)) + (i + 1)) % (i + 1);
+      [this.p[i], this.p[j]] = [this.p[j], this.p[i]];
+    }
+    for (let i = 0; i < 512; i++) {
+      this.perm[i] = this.p[i & 255];
+      this.permMod12[i] = this.perm[i] % 12;
+    }
+  }
+  noise2D(xin, yin) {
+    const grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+    const F2 = 0.5*(Math.sqrt(3)-1), G2 = (3-Math.sqrt(3))/6;
+    const s = (xin+yin)*F2;
+    const i = Math.floor(xin+s), j = Math.floor(yin+s);
+    const t = (i+j)*G2;
+    const x0 = xin-(i-t), y0 = yin-(j-t);
+    const i1 = x0>y0?1:0, j1 = x0>y0?0:1;
+    const x1 = x0-i1+G2, y1 = y0-j1+G2;
+    const x2 = x0-1+2*G2, y2 = y0-1+2*G2;
+    const ii=i&255, jj=j&255;
+    const gi0=this.permMod12[ii+this.perm[jj]];
+    const gi1=this.permMod12[ii+i1+this.perm[jj+j1]];
+    const gi2=this.permMod12[ii+1+this.perm[jj+1]];
+    let n0=0,n1=0,n2=0;
+    let t0=0.5-x0*x0-y0*y0; if(t0>=0){t0*=t0;n0=t0*t0*(grad3[gi0][0]*x0+grad3[gi0][1]*y0);}
+    let t1=0.5-x1*x1-y1*y1; if(t1>=0){t1*=t1;n1=t1*t1*(grad3[gi1][0]*x1+grad3[gi1][1]*y1);}
+    let t2=0.5-x2*x2-y2*y2; if(t2>=0){t2*=t2;n2=t2*t2*(grad3[gi2][0]*x2+grad3[gi2][1]*y2);}
+    return 70*(n0+n1+n2);
+  }
+}
+function octaveNoise(noise, x, y, octaves, persistence, lacunarity) {
+  let value=0, amplitude=1, frequency=1, max=0;
+  for (let i=0;i<octaves;i++) {
+    value += noise.noise2D(x*frequency, y*frequency)*amplitude;
+    max += amplitude; amplitude *= persistence; frequency *= lacunarity;
+  }
+  return value/max;
+}
 
-  // Dynamically import the game after Phaser is loaded
-  import('./src/main.js').then(() => {
-    clearInterval(interval);
-    bar.style.width = '100%';
-    setTimeout(() => {
-      const loading = document.getElementById('loading');
-      loading.style.opacity = '0';
-      setTimeout(() => loading.remove(), 1000);
-    }, 400);
-  }).catch(err => {
-    tip.textContent = 'エラー: ' + err.message;
-    console.error(err);
+// ─── Tile Types ──────────────────────────────────────────────────────────────
+const TILE = { DEEP_OCEAN:0, OCEAN:1, SHALLOW:2, BEACH:3, PLAINS:4, FOREST:5, MOUNTAIN:6, SNOW:7 };
+const TILE_META = {
+  0:{ name:'深海',   walkable:false, sailable:true,  color:0x0a2a6e, darkColor:0x061840 },
+  1:{ name:'大洋',   walkable:false, sailable:true,  color:0x1a4fa8, darkColor:0x0d2d6e },
+  2:{ name:'浅瀬',   walkable:false, sailable:true,  color:0x3a7fd5, darkColor:0x1e4a8a },
+  3:{ name:'砂浜',   walkable:true,  sailable:false, color:0xe8d5a0, darkColor:0xb8a870 },
+  4:{ name:'草原',   walkable:true,  sailable:false, color:0x5a9e3a, darkColor:0x3a6e28 },
+  5:{ name:'森林',   walkable:true,  sailable:false, color:0x2d6e20, darkColor:0x1a4014 },
+  6:{ name:'山岳',   walkable:true,  sailable:false, color:0x7a6a5a, darkColor:0x4a3e30 },
+  7:{ name:'雪山',   walkable:true,  sailable:false, color:0xe8eef5, darkColor:0xb0bcc8 },
+};
+const WATER_TILES = new Set([0,1,2]);
+const LAND_TILES  = new Set([3,4,5,6,7]);
+
+// ─── World Generator ─────────────────────────────────────────────────────────
+const WORLD_SIZE = 512;
+const TILE_SIZE  = 32;
+
+class WorldGenerator {
+  constructor(seed) {
+    this.seed = seed || 42;
+    this.heightNoise  = new SimplexNoise(this.seed);
+    this.detailNoise  = new SimplexNoise(this.seed * 1.618);
+    this.heightMap    = new Float32Array(WORLD_SIZE * WORLD_SIZE);
+    this.tileMap      = new Uint8Array(WORLD_SIZE * WORLD_SIZE);
+    this.docks        = [];
+  }
+  generate() {
+    const cx=WORLD_SIZE/2, cy=WORLD_SIZE/2, maxDist=WORLD_SIZE*0.48;
+    for (let y=0;y<WORLD_SIZE;y++) for (let x=0;x<WORLD_SIZE;x++) {
+      const nx=x/WORLD_SIZE*4, ny=y/WORLD_SIZE*4;
+      const h = octaveNoise(this.heightNoise, nx, ny, 7, 0.5, 2.0)*0.5+0.5;
+      const d = octaveNoise(this.detailNoise, nx*2, ny*2, 4, 0.4, 2.5)*0.5+0.5;
+      const combined = h*0.7+d*0.3;
+      const dx=(x-cx)/maxDist, dy=(y-cy)/maxDist;
+      const radial=Math.sqrt(dx*dx+dy*dy);
+      const falloff=1-Math.pow(Math.max(0,radial-0.3)/0.7,1.5);
+      this.heightMap[y*WORLD_SIZE+x]=combined*falloff;
+    }
+    this._classify(); this._findDocks(); return this;
+  }
+  _classify() {
+    for (let i=0;i<WORLD_SIZE*WORLD_SIZE;i++) {
+      const h=this.heightMap[i];
+      if      (h<0.30) this.tileMap[i]=0;
+      else if (h<0.40) this.tileMap[i]=1;
+      else if (h<0.46) this.tileMap[i]=2;
+      else if (h<0.50) this.tileMap[i]=3;
+      else if (h<0.66) this.tileMap[i]=4;
+      else if (h<0.78) this.tileMap[i]=5;
+      else if (h<0.88) this.tileMap[i]=6;
+      else             this.tileMap[i]=7;
+    }
+  }
+  _findDocks() {
+    for (let y=1;y<WORLD_SIZE-1;y+=8) for (let x=1;x<WORLD_SIZE-1;x+=8) {
+      const idx=y*WORLD_SIZE+x;
+      if (this.tileMap[idx]===TILE.BEACH) {
+        const nb=[this.tileMap[(y-1)*WORLD_SIZE+x],this.tileMap[(y+1)*WORLD_SIZE+x],
+                  this.tileMap[y*WORLD_SIZE+(x-1)],this.tileMap[y*WORLD_SIZE+(x+1)]];
+        if (nb.some(t=>t===TILE.SHALLOW||t===TILE.OCEAN)) this.docks.push({x,y});
+      }
+    }
+  }
+  getTile(tx,ty) {
+    if(tx<0||ty<0||tx>=WORLD_SIZE||ty>=WORLD_SIZE) return 0;
+    return this.tileMap[ty*WORLD_SIZE+tx];
+  }
+  getSpawnPoint() {
+    for (let y=WORLD_SIZE/2-30;y<WORLD_SIZE/2+30;y++)
+      for (let x=WORLD_SIZE/2-30;x<WORLD_SIZE/2+30;x++)
+        if (this.getTile(x,y)===TILE.PLAINS) return {x:x*TILE_SIZE+TILE_SIZE/2,y:y*TILE_SIZE+TILE_SIZE/2};
+    return {x:WORLD_SIZE/2*TILE_SIZE,y:WORLD_SIZE/2*TILE_SIZE};
+  }
+}
+
+// ─── Day/Night Cycle ─────────────────────────────────────────────────────────
+class DayNightCycle {
+  constructor() { this.time=0.35; this.speed=1/(60*60*3); this.overlay=null; }
+  create(scene) {
+    this.overlay=scene.add.rectangle(0,0,scene.scale.width*4,scene.scale.height*4,0x000000,0)
+      .setScrollFactor(0).setDepth(80).setOrigin(0,0);
+  }
+  update(delta) { this.time=(this.time+this.speed*delta)%1; this._apply(); }
+  _apply() {
+    const t=this.time;
+    let r,g,b,a;
+    if(t<0.25){ const p=t/0.25; r=_l(0x05,0xff,p*p);g=_l(0x08,0x88,p*p);b=_l(0x20,0x44,p);a=_l(0.65,0.1,p); }
+    else if(t<0.35){ const p=(t-0.25)/0.1; r=0xff;g=_l(0x88,0xff,p);b=_l(0x44,0xff,p);a=_l(0.1,0.0,p); }
+    else if(t<0.65){ a=0.0;r=g=b=0xff; }
+    else if(t<0.75){ const p=(t-0.65)/0.1; r=0xff;g=_l(0xff,0x66,p);b=_l(0xff,0x22,p);a=_l(0.0,0.25,p); }
+    else if(t<0.85){ const p=(t-0.75)/0.1; r=_l(0xff,0x05,p);g=_l(0x66,0x08,p);b=_l(0x22,0x20,p);a=_l(0.25,0.65,p); }
+    else { r=0x05;g=0x08;b=0x20;a=0.65; }
+    this.overlay.setFillStyle((r<<16)|(g<<8)|b,a);
+  }
+  getTimeString() {
+    const m=Math.floor(this.time*24*60);
+    return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+  }
+  isNight(){ return this.time<0.25||this.time>0.80; }
+}
+function _l(a,b,t){ return Math.round(a+(b-a)*Math.min(1,Math.max(0,t))); }
+
+// ─── Weather System ───────────────────────────────────────────────────────────
+const WEATHER_NAMES = { clear:'快晴', cloudy:'曇り', rain:'雨', storm:'嵐' };
+class WeatherSystem {
+  constructor() { this.current='clear'; this.timer=0; this.interval=180000; this.intensity=0; this.targetIntensity=0; }
+  create(scene) {
+    this.scene=scene;
+    this.rainG=scene.add.graphics().setScrollFactor(0).setDepth(75);
+  }
+  update(delta) {
+    this.timer+=delta;
+    if(this.timer>=this.interval){ this.timer=0; this._roll(); }
+    this.intensity+=(this.targetIntensity-this.intensity)*0.02;
+    this._draw();
+  }
+  _roll() {
+    const r=Math.random();
+    if(r<0.4) this._set('clear');
+    else if(r<0.7) this._set('cloudy');
+    else if(r<0.9) this._set('rain');
+    else this._set('storm');
+  }
+  _set(w) {
+    this.current=w;
+    this.targetIntensity={clear:0,cloudy:0,rain:0.5,storm:1.0}[w];
+    if(w==='storm'&&this.scene?.cameras?.main) this.scene.cameras.main.shake(500,0.005);
+  }
+  _draw() {
+    const g=this.rainG; g.clear();
+    if(this.intensity<0.05){g.setAlpha(0);return;}
+    g.setAlpha(this.intensity*0.4);
+    const W=this.scene.scale.width, H=this.scene.scale.height;
+    const drops=Math.floor(this.intensity*200);
+    g.lineStyle(1,0xaaccff,0.7);
+    for(let i=0;i<drops;i++){
+      const x=Math.random()*W, y=Math.random()*H;
+      g.lineBetween(x,y,x-3,y+12);
+    }
+  }
+  getIcon(){ return {clear:'☀',cloudy:'☁',rain:'🌧',storm:'⛈'}[this.current]; }
+  getName(){ return WEATHER_NAMES[this.current]||'快晴'; }
+}
+
+// ─── Tile Renderer ────────────────────────────────────────────────────────────
+const CHUNK=16, VIEW_CHUNKS=5;
+class TileRenderer {
+  constructor(scene,world){ this.scene=scene; this.world=world; this.chunks=new Map(); this.lastCX=-999; this.lastCY=-999; }
+  update(px,py) {
+    const cx=Math.floor(px/(CHUNK*TILE_SIZE)), cy=Math.floor(py/(CHUNK*TILE_SIZE));
+    if(cx!==this.lastCX||cy!==this.lastCY){ this._rebuild(cx,cy); this.lastCX=cx; this.lastCY=cy; }
+  }
+  _rebuild(cx,cy) {
+    const needed=new Set();
+    for(let dy=-VIEW_CHUNKS;dy<=VIEW_CHUNKS;dy++) for(let dx=-VIEW_CHUNKS;dx<=VIEW_CHUNKS;dx++){
+      const key=`${cx+dx},${cy+dy}`; needed.add(key);
+      if(!this.chunks.has(key)) this._build(cx+dx,cy+dy,key);
+    }
+    for(const [k,g] of this.chunks) if(!needed.has(k)){ g.destroy(); this.chunks.delete(k); }
+  }
+  _build(cx,cy,key) {
+    const g=this.scene.add.graphics().setDepth(0);
+    const sx=cx*CHUNK, sy=cy*CHUNK;
+    for(let ty=sy;ty<sy+CHUNK;ty++) for(let tx=sx;tx<sx+CHUNK;tx++){
+      const type=this.world.getTile(tx,ty);
+      const meta=TILE_META[type];
+      const v=this._v(tx,ty);
+      const color=this._blend(meta.color,meta.darkColor,v*0.3);
+      g.fillStyle(color,1);
+      g.fillRect(tx*TILE_SIZE,ty*TILE_SIZE,TILE_SIZE,TILE_SIZE);
+
+      // Shore foam
+      if(type===TILE.SHALLOW){ g.fillStyle(0xffffff,0.25); g.fillRect(tx*TILE_SIZE,ty*TILE_SIZE+TILE_SIZE*0.8,TILE_SIZE,TILE_SIZE*0.2); }
+      // Ocean wave hint
+      if(type===TILE.OCEAN&&v>0.6){ g.fillStyle(0x4a90d8,0.15); g.fillRect(tx*TILE_SIZE+2,ty*TILE_SIZE+TILE_SIZE*0.3,TILE_SIZE-4,4); }
+      // Tree
+      if(type===TILE.FOREST){ this._tree(g,tx,ty,v); }
+      // Mountain
+      if(type===TILE.MOUNTAIN){ this._mtn(g,tx,ty); }
+      // Snow cap
+      if(type===TILE.SNOW){ this._snow(g,tx,ty); }
+      // Grass tufts
+      if(type===TILE.PLAINS&&v>0.6){ this._grass(g,tx,ty,v); }
+      // Beach ripple
+      if(type===TILE.BEACH&&v>0.5){ g.fillStyle(0xd4b86a,0.4); g.fillRect(tx*TILE_SIZE+v*TILE_SIZE*0.6,ty*TILE_SIZE+TILE_SIZE*0.7,TILE_SIZE*0.3,2); }
+    }
+    this.chunks.set(key,g);
+  }
+  _v(tx,ty){ const h=Math.sin(tx*127.1+ty*311.7)*43758.5453; return h-Math.floor(h); }
+  _blend(c1,c2,t){
+    const r1=(c1>>16)&0xff,g1=(c1>>8)&0xff,b1=c1&0xff;
+    const r2=(c2>>16)&0xff,g2=(c2>>8)&0xff,b2=c2&0xff;
+    return (Math.round(r1+(r2-r1)*t)<<16)|(Math.round(g1+(g2-g1)*t)<<8)|Math.round(b1+(b2-b1)*t);
+  }
+  _tree(g,tx,ty,v){
+    const px=tx*TILE_SIZE+TILE_SIZE*0.5+(v-0.5)*8, py=ty*TILE_SIZE+TILE_SIZE*0.65;
+    const sz=6+v*5;
+    g.fillStyle(0x1a5010,0.85); g.fillTriangle(px,py-sz,px-sz*0.7,py+sz*0.3,px+sz*0.7,py+sz*0.3);
+    g.fillStyle(0x0a2808,0.7); g.fillRect(px-2,py+sz*0.3,4,sz*0.45);
+    // second smaller tree
+    if(v>0.7){ const px2=tx*TILE_SIZE+v*TILE_SIZE*0.3, sz2=4+v*3;
+      g.fillStyle(0x245f14,0.7); g.fillTriangle(px2,py-sz2,px2-sz2*0.6,py+sz2*0.3,px2+sz2*0.6,py+sz2*0.3); }
+  }
+  _mtn(g,tx,ty){
+    const px=tx*TILE_SIZE,py=ty*TILE_SIZE;
+    g.fillStyle(0x9a8870,0.5);
+    g.fillTriangle(px+TILE_SIZE*0.5,py+2,px+2,py+TILE_SIZE-2,px+TILE_SIZE-2,py+TILE_SIZE-2);
+    g.fillStyle(0xd0c8b8,0.4);
+    g.fillTriangle(px+TILE_SIZE*0.5,py+2,px+TILE_SIZE*0.3,py+TILE_SIZE*0.45,px+TILE_SIZE*0.7,py+TILE_SIZE*0.45);
+  }
+  _snow(g,tx,ty){
+    const px=tx*TILE_SIZE,py=ty*TILE_SIZE;
+    g.fillStyle(0x8898a8,0.4);
+    g.fillTriangle(px+TILE_SIZE*0.5,py+2,px+2,py+TILE_SIZE-2,px+TILE_SIZE-2,py+TILE_SIZE-2);
+    g.fillStyle(0xffffff,0.7);
+    g.fillTriangle(px+TILE_SIZE*0.5,py+2,px+TILE_SIZE*0.2,py+TILE_SIZE*0.5,px+TILE_SIZE*0.8,py+TILE_SIZE*0.5);
+  }
+  _grass(g,tx,ty,v){
+    const px=tx*TILE_SIZE+v*TILE_SIZE*0.7, py=ty*TILE_SIZE+TILE_SIZE*0.55;
+    g.lineStyle(1,0x3a8020,0.6); g.lineBetween(px,py,px-2,py-6); g.lineBetween(px+7,py,px+9,py-5);
+  }
+}
+
+// ─── Water Shimmer Overlay ────────────────────────────────────────────────────
+class WaterOverlay {
+  constructor(scene){ this.scene=scene; this.time=0;
+    this.g=scene.add.graphics().setScrollFactor(0.015,0.015).setDepth(2).setBlendMode(Phaser.BlendModes.ADD); }
+  update(delta){
+    this.time+=delta*0.001;
+    const g=this.g; g.clear();
+    const W=this.scene.scale.width, H=this.scene.scale.height;
+    for(let row=0;row<5;row++) for(let col=0;col<8;col++){
+      const cw=W/8,ch=H/5;
+      const phase=Math.sin(this.time+col*0.8+row*1.2)*0.5+0.5;
+      const x=col*cw+Math.sin(this.time*0.7+row)*10;
+      const y=row*ch+Math.cos(this.time*0.5+col)*6;
+      g.fillStyle(0x5aaae8,phase*0.06); g.fillEllipse(x+cw/2,y+ch/2,cw*0.8,ch*0.3);
+    }
+  }
+}
+
+// ─── Star / Moon Overlay ──────────────────────────────────────────────────────
+class AtmosphereOverlay {
+  constructor(scene){
+    this.scene=scene; this.stars=[];
+    this.g=scene.add.graphics().setScrollFactor(0).setDepth(78);
+    const W=1920,H=1080;
+    for(let i=0;i<220;i++) this.stars.push({x:Math.random()*W,y:Math.random()*H*0.7,size:Math.random()*1.5+0.3,tw:Math.random()*Math.PI*2});
+  }
+  update(time,dayNight){
+    const t=dayNight.time;
+    const sa=t<0.25?1:t>0.80?1:t<0.35?1-(t-0.25)/0.1:t>0.72?(t-0.72)/0.08:0;
+    const g=this.g; g.clear();
+    if(sa>0.01){
+      for(const s of this.stars){
+        const tw=Math.sin(time*0.002+s.tw)*0.3+0.7;
+        g.fillStyle(0xffffff,sa*tw*0.9); g.fillCircle(s.x,s.y,s.size);
+      }
+      if(sa>0.5){
+        const moonX=this.scene.scale.width*0.8;
+        g.fillStyle(0xffffcc,sa*0.95); g.fillCircle(moonX,60,18);
+        g.fillStyle(0x0a0820,sa*0.95); g.fillCircle(moonX+6,55,14);
+      }
+    }
+  }
+}
+
+// ─── Minimap ──────────────────────────────────────────────────────────────────
+class Minimap {
+  constructor(scene,world){
+    this.scene=scene; this.world=world; this.sz=160; this.sc=this.sz/WORLD_SIZE;
+    const cv=document.createElement('canvas'); cv.width=this.sz; cv.height=this.sz;
+    const ctx=cv.getContext('2d'); const img=ctx.createImageData(this.sz,this.sz);
+    for(let y=0;y<this.sz;y++) for(let x=0;x<this.sz;x++){
+      const col=TILE_META[world.getTile(Math.floor(x/this.sc),Math.floor(y/this.sc))].color;
+      const i=(y*this.sz+x)*4;
+      img.data[i]=(col>>16)&0xff; img.data[i+1]=(col>>8)&0xff; img.data[i+2]=col&0xff; img.data[i+3]=255;
+    }
+    ctx.putImageData(img,0,0);
+    scene.textures.addCanvas('mm_bg',cv);
+    const W=scene.scale.width, H=scene.scale.height;
+    const ox=W-this.sz-14, oy=H-this.sz-14;
+    this.border=scene.add.graphics().setScrollFactor(0).setDepth(90);
+    this.border.fillStyle(0x000000,0.55); this.border.fillRect(ox-2,oy-2,this.sz+4,this.sz+4);
+    this.border.lineStyle(2,0x8899aa,0.8); this.border.strokeRect(ox-2,oy-2,this.sz+4,this.sz+4);
+    scene.add.image(ox+this.sz/2,oy+this.sz/2,'mm_bg').setScrollFactor(0).setDepth(91);
+    this.dot=scene.add.graphics().setScrollFactor(0).setDepth(92);
+    this.ox=ox; this.oy=oy;
+  }
+  update(px,py){
+    const x=px/TILE_SIZE*this.sc, y=py/TILE_SIZE*this.sc;
+    this.dot.clear();
+    this.dot.fillStyle(0xff3333,1); this.dot.fillCircle(this.ox+x,this.oy+y,3);
+    this.dot.lineStyle(1,0xffffff,0.35); this.dot.strokeRect(this.ox+x-10,this.oy+y-7,20,14);
+  }
+}
+
+// ─── Player ───────────────────────────────────────────────────────────────────
+class Player {
+  constructor(scene,x,y,world){
+    this.scene=scene; this.world=world; this.x=x; this.y=y;
+    this.onShip=false; this.facing='down'; this.animFrame=0; this.animTimer=0;
+    this._build(); this._input();
+  }
+  _build(){
+    this.container=this.scene.add.container(this.x,this.y).setDepth(10);
+    this.shadow=this.scene.add.ellipse(0,10,20,8,0x000000,0.25);
+    this.body=this.scene.add.graphics();
+    this.label=this.scene.add.text(0,-30,'旅人',{fontSize:'10px',color:'#fff',stroke:'#000',strokeThickness:2}).setOrigin(0.5);
+    this.container.add([this.shadow,this.body,this.label]);
+    this._drawWalker('down',false);
+  }
+  _drawWalker(dir,moving){
+    const g=this.body; g.clear();
+    // Cloak
+    g.fillStyle(0x3a2060,1); g.fillEllipse(0,4,22,28);
+    // Body
+    g.fillStyle(0x5a3a90,1); g.fillRoundedRect(-8,-8,16,20,3);
+    // Head
+    g.fillStyle(0xf0c880,1); g.fillCircle(0,-14,9);
+    // Hair
+    g.fillStyle(0x2a1a00,1); g.fillArc(0,-18,9,-30,180,false);
+    if(dir!=='up'){
+      g.fillStyle(0x1a0a40,1); g.fillCircle(-3,-13,2); g.fillCircle(3,-13,2);
+      g.lineStyle(1,0xc08060,0.8); g.beginPath(); g.arc(0,-10,3,0,Math.PI); g.strokePath();
+    }
+    // Belt
+    g.lineStyle(2,0x2a1800,0.8); g.lineBetween(-8,3,8,3);
+    // Legs
+    const lp=moving?Math.sin(this.animFrame*0.5)*3:0;
+    g.fillStyle(0x2a1a60,1); g.fillRect(-7,12,6,10+lp); g.fillRect(1,12,6,10-lp);
+    g.fillStyle(0x1a0a00,1); g.fillRect(-8,22+lp,8,4); g.fillRect(0,22-lp,8,4);
+    // Sword
+    g.lineStyle(2,0xaaaacc,1); g.lineBetween(10,-5,16,16);
+    g.fillStyle(0x888800,1); g.fillRect(8,3,6,3);
+  }
+  _drawShip(){
+    const g=this.body; g.clear();
+    g.fillStyle(0x6a3810,1); g.fillEllipse(0,8,52,24);
+    g.fillStyle(0x8a5020,1); g.fillRect(-22,-2,44,14);
+    g.lineStyle(3,0x5a3010,1); g.lineBetween(0,-34,0,14);
+    g.fillStyle(0xf5e8c0,0.92); g.fillTriangle(0,-32,-24,2,0,2);
+    g.fillStyle(0xe8d8a0,0.92); g.fillTriangle(0,-32,24,2,0,2);
+    g.lineStyle(1,0xc0a870,0.5); g.lineBetween(0,-32,-20,0); g.lineBetween(0,-32,20,0);
+    g.fillStyle(0xcc2020,1); g.fillTriangle(0,-34,10,-26,0,-18);
+    // Wake lines
+    g.lineStyle(2,0xaaccff,0.35); g.lineBetween(-20,16,-30,24); g.lineBetween(20,16,30,24);
+  }
+  _input(){
+    this.keys=this.scene.input.keyboard.addKeys({
+      up:Phaser.Input.Keyboard.KeyCodes.W, down:Phaser.Input.Keyboard.KeyCodes.S,
+      left:Phaser.Input.Keyboard.KeyCodes.A, right:Phaser.Input.Keyboard.KeyCodes.D,
+      upA:Phaser.Input.Keyboard.KeyCodes.UP, downA:Phaser.Input.Keyboard.KeyCodes.DOWN,
+      leftA:Phaser.Input.Keyboard.KeyCodes.LEFT, rightA:Phaser.Input.Keyboard.KeyCodes.RIGHT,
+    });
+  }
+  update(delta){
+    const dt=delta/1000; let dx=0,dy=0;
+    if(this.keys.left.isDown||this.keys.leftA.isDown){dx=-1;this.facing='left';}
+    if(this.keys.right.isDown||this.keys.rightA.isDown){dx=1;this.facing='right';}
+    if(this.keys.up.isDown||this.keys.upA.isDown){dy=-1;this.facing='up';}
+    if(this.keys.down.isDown||this.keys.downA.isDown){dy=1;this.facing='down';}
+    if(dx!==0&&dy!==0){dx*=0.707;dy*=0.707;}
+    const speed=this.onShip?220:130;
+    const nx=this.x+dx*speed*dt, ny=this.y+dy*speed*dt;
+    if(this._can(nx,this.y)) this.x=nx;
+    if(this._can(this.x,ny)) this.y=ny;
+    this.x=Math.max(0,Math.min(WORLD_SIZE*TILE_SIZE,this.x));
+    this.y=Math.max(0,Math.min(WORLD_SIZE*TILE_SIZE,this.y));
+    this.container.setPosition(this.x,this.y);
+    const moving=dx!==0||dy!==0;
+    if(moving){this.animTimer+=delta;if(this.animTimer>80){this.animFrame++;this.animTimer=0;}}
+    else this.animFrame=0;
+    if(this.onShip) this._drawShip(); else this._drawWalker(this.facing,moving);
+  }
+  _can(wx,wy){
+    const tx=Math.floor(wx/TILE_SIZE),ty=Math.floor(wy/TILE_SIZE);
+    const meta=TILE_META[this.world.getTile(tx,ty)];
+    return this.onShip?meta.sailable:meta.walkable;
+  }
+  tryBoard(){
+    const tx=Math.floor(this.x/TILE_SIZE),ty=Math.floor(this.y/TILE_SIZE);
+    const nb=[this.world.getTile(tx-1,ty),this.world.getTile(tx+1,ty),
+              this.world.getTile(tx,ty-1),this.world.getTile(tx,ty+1)];
+    if(!this.onShip&&nb.some(t=>WATER_TILES.has(t))){this.onShip=true;return '⛵ 乗船しました';}
+    if(this.onShip&&nb.some(t=>LAND_TILES.has(t))){this.onShip=false;return '🏝 上陸しました';}
+    return null;
+  }
+  getTileInfo(){return TILE_META[this.world.getTile(Math.floor(this.x/TILE_SIZE),Math.floor(this.y/TILE_SIZE))]?.name||'不明';}
+}
+
+// ─── UI Scene ─────────────────────────────────────────────────────────────────
+class UIScene extends Phaser.Scene {
+  constructor(){ super({key:'UIScene',active:true}); }
+  create(){
+    const W=this.scale.width;
+    const bar=this.add.graphics().setDepth(100);
+    bar.fillStyle(0x000000,0.45); bar.fillRect(0,0,W,40);
+    const st={fontSize:'14px',color:'#eeeecc',fontFamily:'Georgia, serif',stroke:'#000',strokeThickness:2};
+    this.timeT=this.add.text(16,12,'⏰ 06:00',st).setDepth(101);
+    this.wxT=this.add.text(140,12,'☀ 快晴',st).setDepth(101);
+    this.biomeT=this.add.text(270,12,'📍 草原',st).setDepth(101);
+    this.coordT=this.add.text(W-170,12,'',st).setDepth(101);
+    this.shipT=this.add.text(W/2,12,'',{...st,color:'#88ccff'}).setOrigin(0.5,0).setDepth(101);
+    const hbar=this.add.graphics().setDepth(100);
+    hbar.fillStyle(0x000000,0.35); hbar.fillRect(0,this.scale.height-28,W,28);
+    this.add.text(W/2,this.scale.height-14,'WASD / 矢印キー: 移動  │  E: 乗船・上陸  │  マウスホイール: ズーム',
+      {fontSize:'11px',color:'#889999',fontFamily:'sans-serif'}).setOrigin(0.5).setDepth(101);
+    this.notif=this.add.text(W/2,80,'',{fontSize:'20px',color:'#ffee88',fontFamily:'Georgia, serif',stroke:'#000',strokeThickness:3})
+      .setOrigin(0.5).setDepth(101).setAlpha(0);
+    this.notifT=0;
+  }
+  update(t,delta){
+    const ws=this.scene.get('WorldScene');
+    if(!ws||!ws.player) return;
+    const p=ws.player,dnc=ws.dayNight,wx=ws.weather;
+    this.timeT.setText('⏰ '+dnc.getTimeString());
+    this.wxT.setText(wx.getIcon()+' '+wx.getName());
+    this.biomeT.setText('📍 '+p.getTileInfo());
+    this.coordT.setText('X:'+Math.floor(p.x/32)+' Y:'+Math.floor(p.y/32));
+    this.shipT.setText(p.onShip?'⛵ 航海中':'');
+    if(this.notifT>0){this.notifT-=delta;this.notif.setAlpha(Math.min(1,this.notifT/600));}
+  }
+  showNotif(msg){this.notif.setText(msg).setAlpha(1);this.notifT=3000;}
+}
+
+// ─── World Scene ──────────────────────────────────────────────────────────────
+class WorldScene extends Phaser.Scene {
+  constructor(){ super({key:'WorldScene'}); }
+  create(){
+    this.cameras.main.setBackgroundColor('#061840');
+    this.world=new WorldGenerator(12345).generate();
+    const sp=this.world.getSpawnPoint();
+    this.dayNight=new DayNightCycle();
+    this.weather=new WeatherSystem();
+    this.tiles=new TileRenderer(this,this.world);
+    this.waterFx=new WaterOverlay(this);
+    this.atmo=new AtmosphereOverlay(this);
+    this.player=new Player(this,sp.x,sp.y,this.world);
+    this.dayNight.create(this);
+    this.weather.create(this);
+    this.minimap=new Minimap(this,this.world);
+    // Dock markers
+    const dg=this.add.graphics().setDepth(3);
+    for(const d of this.world.docks.slice(0,60)){
+      dg.fillStyle(0xffdd44,0.45);
+      dg.fillTriangle(d.x*TILE_SIZE+TILE_SIZE/2,d.y*TILE_SIZE,d.x*TILE_SIZE+3,d.y*TILE_SIZE+TILE_SIZE,d.x*TILE_SIZE+TILE_SIZE-3,d.y*TILE_SIZE+TILE_SIZE);
+    }
+    this.cameras.main.startFollow(this.player.container,true,0.08,0.08);
+    this.cameras.main.setZoom(1.5);
+    this.cameras.main.setBounds(0,0,WORLD_SIZE*TILE_SIZE,WORLD_SIZE*TILE_SIZE);
+    this.input.on('wheel',(_,__,___,dY)=>{
+      this.cameras.main.setZoom(Phaser.Math.Clamp(this.cameras.main.zoom-dY*0.001,0.3,3));
+    });
+    this.input.keyboard.on('keydown-E',()=>{
+      const msg=this.player.tryBoard();
+      if(msg){
+        this.scene.get('UIScene')?.showNotif(msg);
+        this.tweens.add({targets:this.cameras.main,zoom:this.player.onShip?1.0:1.5,duration:900,ease:'Cubic.easeInOut'});
+      }
+    });
+  }
+  update(time,delta){
+    this.player.update(delta);
+    this.tiles.update(this.player.x,this.player.y);
+    this.waterFx.update(delta);
+    this.dayNight.update(delta);
+    this.weather.update(delta);
+    this.atmo.update(time,this.dayNight);
+    this.minimap.update(this.player.x,this.player.y);
+  }
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+// Loading animation
+const bar=document.getElementById('loading-bar');
+const tipEl=document.getElementById('loading-tip');
+const tips=['世界を生成しています…','海流を計算しています…','大陸の輪郭を描いています…','森と山々を配置しています…','港を探しています…','旅立ちの準備をしています…'];
+let pct=0,ti=0;
+const iv=setInterval(()=>{ pct=Math.min(pct+Math.random()*18,92); bar.style.width=pct+'%'; if(ti<tips.length)tipEl.textContent=tips[ti++]; },300);
+
+window.addEventListener('load',()=>{
+  const game=new Phaser.Game({
+    type:Phaser.AUTO,
+    width:window.innerWidth,
+    height:window.innerHeight,
+    backgroundColor:'#061840',
+    scene:[WorldScene,UIScene],
+    scale:{mode:Phaser.Scale.RESIZE,autoCenter:Phaser.Scale.CENTER_BOTH},
+    render:{antialias:true,pixelArt:false},
   });
+  // Hide loading once first frame renders
+  game.events.once('step',()=>{
+    clearInterval(iv); bar.style.width='100%';
+    setTimeout(()=>{ const l=document.getElementById('loading'); if(l){l.style.opacity='0';setTimeout(()=>l.remove(),1000);} },300);
+  });
+  window.addEventListener('resize',()=>game.scale.resize(window.innerWidth,window.innerHeight));
+});
 </script>
 </body>
 </html>
