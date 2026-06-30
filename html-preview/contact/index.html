@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact — SHION KADO</title>
+<meta name="description" content="ブランド整理、Instagram導線、EC改善、提案資料制作の相談を受け付けています。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+
+<header class="site-header" role="banner">
+  <div class="header-inner">
+    <a href="../index.html" class="site-logo" aria-label="Home">SHION KADO</a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+      <span></span><span></span>
+    </button>
+    <nav id="primary-nav" class="primary-nav" role="navigation" aria-label="Primary">
+      <ul class="nav-list">
+        <li><a href="../works/index.html">Works</a></li>
+        <li><a href="../about/index.html">About</a></li>
+        <li><a href="../services/index.html">Services</a></li>
+        <li><a href="../journal/index.html">Journal</a></li>
+        <li><a href="../contact/index.html" class="nav-cta" aria-current="page">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="site-main page-contact">
+  <div class="container">
+
+    <nav class="breadcrumb" aria-label="Breadcrumb"><ol><li><a href="../index.html">Home</a></li><li aria-current="page">Contact</li></ol></nav>
+
+    <header class="page-header fade-in">
+      <p class="page-label">Contact</p>
+      <h1 class="page-title">Start a Project</h1>
+      <p class="page-subtitle">
+        ブランド整理、Instagram導線、EC改善、提案資料制作の相談を受け付けています。<br>
+        まずは現状のご共有とご相談から。
+      </p>
+    </header>
+
+    <div class="contact-grid fade-in">
+
+      <div class="contact-info">
+        <div class="contact-info__block">
+          <p class="contact-info__label">Response</p>
+          <p>3営業日以内にご返信します。</p>
+        </div>
+        <div class="contact-info__block">
+          <p class="contact-info__label">Available for</p>
+          <ul>
+            <li>業務委託 / フリーランス契約</li>
+            <li>副業 / 並走支援</li>
+            <li>転職・採用のご相談</li>
+            <li>コラボレーション</li>
+          </ul>
+        </div>
+        <div class="contact-info__block">
+          <p class="contact-info__label">Instagram</p>
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">@shionkado</a>
+        </div>
+      </div>
+
+      <form class="contact-form" method="POST" action="#">
+        <div class="form-row">
+          <label for="contact_name">Name <span class="required" aria-label="必須">*</span></label>
+          <input type="text" id="contact_name" name="contact_name" required autocomplete="name" placeholder="山田 花子">
+        </div>
+        <div class="form-row">
+          <label for="contact_email">Email <span class="required" aria-label="必須">*</span></label>
+          <input type="email" id="contact_email" name="contact_email" required autocomplete="email" placeholder="hello@example.com">
+        </div>
+        <div class="form-row">
+          <label for="contact_subject">Subject</label>
+          <select id="contact_subject" name="contact_subject">
+            <option value="">選択してください</option>
+            <option value="Branding">ブランド整理・VI設計</option>
+            <option value="SNS Direction">Instagram導線設計</option>
+            <option value="EC Improvement">EC改善</option>
+            <option value="Creative Direction">クリエイティブディレクション</option>
+            <option value="Proposal Design">提案資料設計</option>
+            <option value="Monthly Support">月額支援</option>
+            <option value="Other">その他</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="contact_message">Message <span class="required" aria-label="必須">*</span></label>
+          <textarea id="contact_message" name="contact_message" rows="8" required placeholder="現状の課題・ご相談内容をお聞かせください。"></textarea>
+        </div>
+        <div class="form-row form-submit">
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand"><p class="footer-name">SHION KADO</p><p class="footer-tagline">Brand Strategy &amp; Creative Direction</p></div>
+      <nav class="footer-nav" aria-label="Footer"><ul>
+        <li><a href="../works/index.html">Works</a></li>
+        <li><a href="../about/index.html">About</a></li>
+        <li><a href="../services/index.html">Services</a></li>
+        <li><a href="../process/index.html">Process</a></li>
+        <li><a href="../ai-creative/index.html">AI × Creative</a></li>
+        <li><a href="../journal/index.html">Journal</a></li>
+        <li><a href="../contact/index.html">Contact</a></li>
+      </ul></nav>
+      <div class="footer-social"><a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a></div>
+    </div>
+    <div class="footer-bottom"><p class="footer-copy">&copy; 2024 Shion Kado. All rights reserved.</p></div>
+  </div>
+</footer>
+
+<script src="../assets/js/main.js"></script>
+</body>
+</html>
