@@ -1,0 +1,113 @@
+/* 最終診断画面専用スタイル */
+
+.diagnosis-screen { background: var(--bg-dark); }
+
+.diagnosis-header {
+  text-align: center;
+  padding: 28px 20px 16px;
+}
+.diagnosis-header-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+.diagnosis-header-title {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+/* 診断結果カード */
+.diagnosis-result-card {
+  margin: 0 16px 14px;
+  padding: 24px 20px;
+  background: var(--bg-card);
+  border: 2px solid;
+  border-radius: 20px;
+  text-align: center;
+}
+.diagnosis-result-emoji {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+.diagnosis-result-name {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.diagnosis-result-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.diagnosis-result-desc {
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+/* セクションラベル */
+.diagnosis-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+/* メーターに星評価を添える */
+.diagnosis-meter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.diagnosis-meter-row > :first-child { flex: 1; }
+.diagnosis-stars {
+  font-size: 0.78rem;
+  color: var(--accent-yellow);
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* 選択履歴 */
+.diagnosis-history-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.82rem;
+}
+.diagnosis-history-item:last-child { border-bottom: none; }
+.diagnosis-history-day {
+  color: var(--accent-cyan);
+  font-weight: 700;
+  min-width: 38px;
+  font-size: 0.75rem;
+}
+.diagnosis-history-emoji { font-size: 1rem; flex-shrink: 0; }
+.diagnosis-history-text { color: var(--text-secondary); line-height: 1.4; }
+
+/* メッセージ */
+.diagnosis-message {
+  margin: 0 20px 16px;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.diagnosis-actions { padding: 0 20px 16px; }
+
+/* フッター */
+.diagnosis-footer {
+  padding: 0 20px 32px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
+}

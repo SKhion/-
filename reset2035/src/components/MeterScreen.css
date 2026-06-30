@@ -1,0 +1,106 @@
+/* メーター変化画面専用スタイル */
+
+.meter-screen { background: var(--bg-dark); }
+
+.meter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px 12px;
+}
+.meter-header-day {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* 選択表示 */
+.meter-choice-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 16px 12px;
+  padding: 14px 16px;
+  background: rgba(57,255,20,0.05);
+  border: 1px solid rgba(57,255,20,0.2);
+  border-radius: 14px;
+}
+.meter-choice-emoji { font-size: 1.8rem; flex-shrink: 0; }
+.meter-choice-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-green);
+  line-height: 1.5;
+}
+
+/* 結果カード */
+.meter-result-card {
+  margin: 0 16px 12px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+}
+.meter-result-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.meter-result-text {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+/* メーター変化ラベル */
+.meter-change-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+/* 変化の解説 */
+.meter-delta-explain {
+  margin: 0 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.meter-delta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+.meter-delta-item.good {
+  background: rgba(57,255,20,0.06);
+  border: 1px solid rgba(57,255,20,0.2);
+  color: var(--accent-green);
+}
+.meter-delta-item.bad {
+  background: rgba(255,107,53,0.06);
+  border: 1px solid rgba(255,107,53,0.2);
+  color: var(--accent-orange);
+}
+.meter-delta-val { font-weight: 700; margin-left: auto; }
+.meter-delta-arrow { font-size: 0.72rem; font-weight: 700; }
+
+/* Tips */
+.meter-tip {
+  margin: 0 16px 16px;
+  padding: 12px 14px;
+  background: rgba(0,245,255,0.04);
+  border: 1px solid rgba(0,245,255,0.15);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--accent-cyan);
+  line-height: 1.6;
+}
+
+.meter-actions { padding: 0 20px 24px; }

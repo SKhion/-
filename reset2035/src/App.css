@@ -1,0 +1,134 @@
+/* ===================================================
+   グローバルCSS - 全画面共通スタイル
+   サイバーポップ × SNSアプリをイメージしたデザイン
+   =================================================== */
+
+:root {
+  --bg-dark: #050a14;
+  --bg-card: #0d1b2a;
+  --bg-card2: #0a1520;
+  --accent-green: #39ff14;
+  --accent-cyan: #00f5ff;
+  --accent-pink: #ff00aa;
+  --accent-orange: #ff6b35;
+  --accent-yellow: #ffff00;
+  --text-primary: #e8f0ff;
+  --text-secondary: #8899bb;
+  --text-muted: #4a5a7a;
+  --border-subtle: rgba(255,255,255,0.08);
+  --font-main: 'Noto Sans JP','Hiragino Kaku Gothic ProN',sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  min-height: 100vh;
+  max-width: 430px;
+  margin: 0 auto;
+  background: var(--bg-dark);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.screen { min-height: 100vh; padding-bottom: 80px; }
+
+.btn-primary {
+  display: block; width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, var(--accent-green), #00cc00);
+  color: #050a14; font-size: 1.1rem; font-weight: 700;
+  border: none; border-radius: 12px; cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 0 20px rgba(57,255,20,0.4);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(57,255,20,0.6); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  display: block; width: 100%;
+  padding: 14px 24px;
+  background: transparent; color: var(--accent-cyan);
+  font-size: 1rem; font-weight: 600;
+  border: 1.5px solid var(--accent-cyan); border-radius: 12px; cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.btn-secondary:hover { background: rgba(0,245,255,0.08); box-shadow: 0 0 16px rgba(0,245,255,0.3); }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px; padding: 16px;
+  margin: 0 16px 12px;
+}
+
+.meter-bar-wrap { margin-bottom: 10px; }
+.meter-label-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 4px; font-size: 0.78rem; color: var(--text-secondary);
+}
+.meter-label-row .label { font-weight: 700; font-size: 0.82rem; letter-spacing: 0.06em; }
+.meter-track { height: 8px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; }
+.meter-fill { height: 100%; border-radius: 999px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+
+.glow-text-green { color: var(--accent-green); text-shadow: 0 0 12px rgba(57,255,20,0.7); }
+.glow-text-cyan  { color: var(--accent-cyan);  text-shadow: 0 0 12px rgba(0,245,255,0.7); }
+.glow-text-pink  { color: var(--accent-pink);  text-shadow: 0 0 12px rgba(255,0,170,0.7); }
+
+.sns-card {
+  background: var(--bg-card2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px; padding: 14px;
+  margin: 0 16px 10px;
+}
+.sns-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.sns-avatar {
+  font-size: 1.6rem; width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.05); border-radius: 50%; flex-shrink: 0;
+}
+.sns-username { font-size: 0.82rem; color: var(--accent-cyan); font-weight: 700; }
+.sns-time { font-size: 0.72rem; color: var(--text-muted); }
+.sns-text { font-size: 0.9rem; line-height: 1.6; color: var(--text-primary); }
+.sns-likes { margin-top: 10px; font-size: 0.78rem; color: var(--text-secondary); }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeInUp 0.4s ease forwards; }
+.fade-in-delay-1 { opacity: 0; animation: fadeInUp 0.4s 0.1s ease forwards; }
+.fade-in-delay-2 { opacity: 0; animation: fadeInUp 0.4s 0.2s ease forwards; }
+.fade-in-delay-3 { opacity: 0; animation: fadeInUp 0.4s 0.3s ease forwards; }
+.fade-in-delay-4 { opacity: 0; animation: fadeInUp 0.4s 0.4s ease forwards; }
+.fade-in-delay-5 { opacity: 0; animation: fadeInUp 0.4s 0.5s ease forwards; }
+
+@keyframes pulse-glow {
+  0%,100% { text-shadow: 0 0 10px rgba(57,255,20,0.5); }
+  50%      { text-shadow: 0 0 30px rgba(57,255,20,1), 0 0 60px rgba(57,255,20,0.4); }
+}
+.pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+
+.day-progress-bar { height: 3px; background: rgba(255,255,255,0.06); }
+.day-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px rgba(57,255,20,0.5);
+}
+
+.chip { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; }
+.chip-green { background: rgba(57,255,20,0.12); color: var(--accent-green); border: 1px solid rgba(57,255,20,0.3); }
+.chip-cyan  { background: rgba(0,245,255,0.12);  color: var(--accent-cyan);  border: 1px solid rgba(0,245,255,0.3); }
+.chip-pink  { background: rgba(255,0,170,0.12);  color: var(--accent-pink);  border: 1px solid rgba(255,0,170,0.3); }
+
+.divider { height: 1px; background: var(--border-subtle); margin: 16px; }

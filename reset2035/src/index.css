@@ -1,0 +1,4 @@
+/* ベースリセット：index.cssはApp.cssで完結するので最小限に */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body { background: #050a14; overflow-x: hidden; }
