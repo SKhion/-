@@ -1,0 +1,137 @@
+/* Day選択画面専用スタイル */
+
+.day-screen { background: var(--bg-dark); }
+
+/* ヘッダー */
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px 10px;
+}
+.day-header-left { display: flex; align-items: baseline; gap: 4px; }
+.day-number {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--accent-green);
+  letter-spacing: 0.05em;
+}
+.day-total { font-size: 0.85rem; color: var(--text-muted); }
+.day-header-right { display: flex; align-items: center; gap: 6px; }
+.day-theme-icon { font-size: 1.2rem; }
+.day-theme {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.04);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+/* メーターラベル */
+.day-meters-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+/* シーン説明 */
+.day-scene {
+  margin: 0 16px 12px;
+  padding: 14px 16px;
+  background: rgba(57,255,20,0.04);
+  border-left: 3px solid var(--accent-green);
+  border-radius: 0 10px 10px 0;
+}
+.day-scene-text {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* メッセージカード */
+.day-message-card {
+  margin: 0 16px 8px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+.day-message-from {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-bottom: 4px;
+}
+.day-message-text {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* 選択ラベル */
+.day-choice-section { padding: 4px 0; }
+.day-choice-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  padding: 0 20px;
+  margin-bottom: 8px;
+}
+
+/* 選択ボタン */
+.day-choice-btn {
+  display: block; width: calc(100% - 32px);
+  margin: 0 16px 10px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.day-choice-btn.hovered,
+.day-choice-btn:active {
+  border-color: var(--accent-green);
+  background: rgba(57,255,20,0.06);
+  transform: translateY(-1px);
+}
+
+.day-choice-top {
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.day-choice-emoji { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+.day-choice-texts { flex: 1; }
+.day-choice-main {
+  font-size: 0.95rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 3px;
+}
+.day-choice-sub {
+  font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4;
+}
+
+/* ホバー時のメーター変化プレビュー */
+.day-choice-preview {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.day-choice-delta {
+  font-size: 0.72rem; font-weight: 700;
+  background: rgba(255,255,255,0.04);
+  padding: 2px 8px; border-radius: 6px;
+}
+
+/* ヒント */
+.day-hint {
+  margin: 4px 20px 16px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}

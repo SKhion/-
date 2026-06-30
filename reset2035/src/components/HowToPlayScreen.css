@@ -1,0 +1,95 @@
+/* 遊び方画面専用スタイル */
+
+.howto-screen {
+  background: var(--bg-dark);
+}
+
+.howto-header {
+  padding: 32px 20px 20px;
+  text-align: center;
+}
+.howto-title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.howto-sub {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+/* ルールリスト */
+.howto-rules {
+  padding: 0 16px;
+}
+.howto-rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.howto-rule-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.howto-rule-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+.howto-rule-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* メーター説明 */
+.howto-meters-section {
+  padding: 0 16px 12px;
+}
+.howto-section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+.howto-meter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.howto-meter-emoji { font-size: 1.3rem; flex-shrink: 0; }
+.howto-meter-info { display: flex; flex-direction: column; gap: 2px; }
+.howto-meter-label { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; }
+.howto-meter-desc { font-size: 0.78rem; color: var(--text-secondary); }
+
+/* 注意書き */
+.howto-note {
+  margin: 0 16px 16px;
+  padding: 12px 14px;
+  background: rgba(255,255,170,0.05);
+  border: 1px solid rgba(255,255,0,0.15);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--accent-yellow);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.howto-actions {
+  padding: 0 20px 24px;
+}
