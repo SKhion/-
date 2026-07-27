@@ -1,0 +1,32 @@
+{
+  "name": "ai-business-crm-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI事業会社の CRM / 営業自動化 API（SQLiteでゼロコンフィグ起動、Supabase/Postgresへの移行パスあり）",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "seed": "ts-node src/seed.ts",
+    "test": "node --test dist/test/*.test.js",
+    "test:src": "npm run build && npm run test"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KPIダッシュボード | AI事業会社</title>
+<style>
+  :root {
+    --bg: #0b0d12; --card: #151922; --text: #e8ecf4; --muted: #8b93a7;
+    --accent: #5b8cff; --good: #35d399; --warn: #f5a623; --bad: #ff5c7c; --border: #262c3a;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #f5f6fa; --card: #ffffff; --text: #1a1f2b; --muted: #5b6373; --border: #e3e6ee; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family: -apple-system, "Hiragino Sans", "Segoe UI", sans-serif; }
+  header { padding: 24px clamp(16px,4vw,48px) 8px; }
+  header h1 { margin:0; font-size: 1.4rem; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: .85rem; }
+  .controls { padding: 0 clamp(16px,4vw,48px); display:flex; gap:8px; align-items:center; margin-bottom: 8px; }
+  .controls input { flex:1; max-width:360px; padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); }
+  .controls button { padding:8px 14px; border-radius:8px; border:1px solid var(--border); background:var(--accent); color:#fff; cursor:pointer; }
+  main { padding: 8px clamp(16px,4vw,48px) 48px; max-width: 1200px; margin: 0 auto; }
+  .kpi-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px; margin-bottom: 24px; }
+  .kpi-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; }
+  .kpi-card .label { color:var(--muted); font-size:.78rem; }
+  .kpi-card .value { font-size:1.6rem; font-weight:700; margin-top:6px; }
+  .kpi-card .value.good { color: var(--good); }
+  .kpi-card .value.warn { color: var(--warn); }
+  section { margin-top: 28px; }
+  section h2 { font-size:1rem; border-bottom:1px solid var(--border); padding-bottom:8px; }
+  table { width:100%; border-collapse: collapse; font-size:.88rem; overflow-x:auto; display:block; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  th { color:var(--muted); font-weight:600; }
+  .pill { padding:2px 8px; border-radius:999px; font-size:.75rem; }
+  .pill.active, .pill.won, .pill.done { background: rgba(53,211,153,.15); color: var(--good); }
+  .pill.churned, .pill.lost { background: rgba(255,92,124,.15); color: var(--bad); }
+  .pill.todo, .pill.cold, .pill.draft { background: rgba(139,147,167,.15); color: var(--muted); }
+  .empty { color: var(--muted); padding: 12px 0; font-size:.85rem; }
+  footer { text-align:center; color:var(--muted); font-size:.75rem; padding: 24px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📊 KPIダッシュボード</h1>
+  <p>利益 → LTV → 継続率 → アップセル率 → 紹介率 → 営業効率 → AI自動化率 → 売上</p>
+</header>
+<div class="controls">
+  <input id="apiBase" placeholder="APIのURL（例: http://localhost:4000）" />
+  <button id="reload">更新</button>
+</div>
+<main>
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <section>
+    <h2>更新45日以内の契約（Customer Success 対応対象）</h2>
+    <div id="renewals"></div>
+  </section>
+
+  <section>
+    <h2>案件パイプライン（リード）</h2>
+    <div id="leads"></div>
+  </section>
+
+  <section>
+    <h2>タスク（未完了）</h2>
+    <div id="tasks"></div>
+  </section>
+</main>
+<footer>business/dashboard — business/api の /api/kpi/summary などを参照して表示するだけの静的ダッシュボード</footer>
+
+<script>
+const DEFAULT_BASE = localStorage.getItem("apiBase") || "http://localhost:4000";
+document.getElementById("apiBase").value = DEFAULT_BASE;
+
+function fmtJpy(n) {
+  if (n === null || n === undefined) return "—";
+  return "¥" + Math.round(n).toLocaleString("ja-JP");
+}
+function fmtPct(n) {
+  if (n === null || n === undefined) return "—";
+  return (n * 100).toFixed(1) + "%";
+}
+function pill(text) {
+  return `<span class="pill ${text}">${text}</span>`;
+}
+
+async function fetchJson(base, path) {
+  try {
+    const res = await fetch(base + path);
+    if (!res.ok) throw new Error(res.statusText);
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+function kpiCard(label, value, cls) {
+  return `<div class="kpi-card"><div class="label">${label}</div><div class="value ${cls||''}">${value}</div></div>`;
+}
+
+async function load() {
+  const base = document.getElementById("apiBase").value.trim().replace(/\/$/, "");
+  localStorage.setItem("apiBase", base);
+
+  const summary = await fetchJson(base, "/api/kpi/summary");
+  const grid = document.getElementById("kpiGrid");
+  if (!summary) {
+    grid.innerHTML = `<div class="empty">API (${base}) に接続できません。business/api を起動してください（npm run dev）。</div>`;
+  } else {
+    grid.innerHTML = [
+      kpiCard("月間見込み利益", fmtJpy(summary.profit_estimate_jpy), "good"),
+      kpiCard("LTV（想定）", fmtJpy(summary.ltv_estimate_jpy)),
+      kpiCard("継続率", fmtPct(summary.retention_rate), summary.retention_rate >= 0.9 ? "good" : "warn"),
+      kpiCard("アップセル率", fmtPct(summary.upsell_rate)),
+      kpiCard("紹介率", fmtPct(summary.referral_rate)),
+      kpiCard("営業効率（成約率）", fmtPct(summary.sales_efficiency)),
+      kpiCard("AI自動化率", fmtPct(summary.ai_automation_rate), summary.ai_automation_rate >= 0.9 ? "good" : "warn"),
+      kpiCard("月次経常収益(MRR)", fmtJpy(summary.monthly_recurring_revenue_jpy)),
+    ].join("");
+  }
+
+  const renewals = await fetchJson(base, "/api/contracts/renewals/upcoming");
+  document.getElementById("renewals").innerHTML = renderTable(renewals, ["company_id","service_id","monthly_price","renewal_date"], {monthly_price: fmtJpy});
+
+  const leads = await fetchJson(base, "/api/leads");
+  document.getElementById("leads").innerHTML = renderTable(leads, ["company_id","source","stage","pain"], {stage: (v)=>pill(v)});
+
+  const tasks = await fetchJson(base, "/api/tasks?status=todo");
+  document.getElementById("tasks").innerHTML = renderTable(tasks, ["company_id","title","assignee_agent","priority","due_date"]);
+}
+
+function renderTable(rows, cols, formatters) {
+  if (!rows || rows.length === 0) return `<div class="empty">データがありません（CRMにまだ登録がないか、APIに接続できていません）</div>`;
+  const head = cols.map(c => `<th>${c}</th>`).join("");
+  const body = rows.map(r => {
+    const cells = cols.map(c => {
+      const raw = r[c];
+      const f = formatters && formatters[c];
+      return `<td>${f ? f(raw) : (raw ?? "")}</td>`;
+    }).join("");
+    return `<tr>${cells}</tr>`;
+  }).join("");
+  return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+document.getElementById("reload").addEventListener("click", load);
+load();
+</script>
+</body>
+</html>

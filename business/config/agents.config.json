@@ -1,0 +1,17 @@
+{
+  "default_model": "claude-sonnet-5",
+  "agents": [
+    { "id": "ceo", "name": "CEO", "prompt_file": "prompts/ceo.md", "temperature": 0.2 },
+    { "id": "sales", "name": "Sales", "prompt_file": "prompts/sales.md", "temperature": 0.4 },
+    { "id": "marketing", "name": "Marketing", "prompt_file": "prompts/marketing.md", "temperature": 0.5 },
+    { "id": "research", "name": "Research", "prompt_file": "prompts/research.md", "temperature": 0.2 },
+    { "id": "creative", "name": "Creative", "prompt_file": "prompts/creative.md", "temperature": 0.7 },
+    { "id": "coding", "name": "Coding", "prompt_file": "prompts/coding.md", "temperature": 0.1 },
+    { "id": "brand", "name": "Brand", "prompt_file": "prompts/brand.md", "temperature": 0.3 },
+    { "id": "finance", "name": "Finance", "prompt_file": "prompts/finance.md", "temperature": 0.1 },
+    { "id": "sns", "name": "SNS", "prompt_file": "prompts/sns.md", "temperature": 0.6 },
+    { "id": "customer_success", "name": "CustomerSuccess", "prompt_file": "prompts/customer_success.md", "temperature": 0.3 },
+    { "id": "project_manager", "name": "ProjectManager", "prompt_file": "prompts/project_manager.md", "temperature": 0.2 },
+    { "id": "data_analyst", "name": "DataAnalyst", "prompt_file": "prompts/data_analyst.md", "temperature": 0.1 }
+  ]
+}

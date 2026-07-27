@@ -1,0 +1,63 @@
+{
+  "name": "lead_intake_to_proposal",
+  "notes": "問い合わせ受付から提案書生成までを繋ぐn8nワークフロー雛形。実運用時はCredential（Gmail/Anthropic API/自社APIのURL）を設定してActivateする。business/scripts の各Pythonスクリプトを Execute Command ノードから呼び出す構成。",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Webhook: 問い合わせ受付",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": { "path": "lead-intake", "httpMethod": "POST" }
+    },
+    {
+      "id": "2",
+      "name": "CRM: 企業登録",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.CRM_API_BASE}}/api/companies",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\"name\": $json.company_name, \"industry\": $json.industry, \"contact_email\": $json.email}"
+      }
+    },
+    {
+      "id": "3",
+      "name": "企業分析スクリプト実行",
+      "type": "n8n-nodes-base.executeCommand",
+      "parameters": {
+        "command": "python3 business/scripts/company_research.py --company \"{{$json.company_name}}\" --industry \"{{$json.industry}}\""
+      }
+    },
+    {
+      "id": "4",
+      "name": "CRM: リード登録(stage=contacted)",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.CRM_API_BASE}}/api/leads",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\"company_id\": $json.company_id, \"source\": \"inbound\", \"stage\": \"contacted\"}"
+      }
+    },
+    {
+      "id": "5",
+      "name": "提案書生成スクリプト実行",
+      "type": "n8n-nodes-base.executeCommand",
+      "parameters": {
+        "command": "python3 business/scripts/proposal_generator.py --company \"{{$json.company_name}}\" --service instagram-diagnosis --pain \"{{$json.pain}}\""
+      }
+    },
+    {
+      "id": "6",
+      "name": "Gmail: 提案書送付",
+      "type": "n8n-nodes-base.gmail",
+      "parameters": { "operation": "send" }
+    }
+  ],
+  "connections": {
+    "Webhook: 問い合わせ受付": { "main": [[{ "node": "CRM: 企業登録", "type": "main", "index": 0 }]] },
+    "CRM: 企業登録": { "main": [[{ "node": "企業分析スクリプト実行", "type": "main", "index": 0 }]] },
+    "企業分析スクリプト実行": { "main": [[{ "node": "CRM: リード登録(stage=contacted)", "type": "main", "index": 0 }]] },
+    "CRM: リード登録(stage=contacted)": { "main": [[{ "node": "提案書生成スクリプト実行", "type": "main", "index": 0 }]] },
+    "提案書生成スクリプト実行": { "main": [[{ "node": "Gmail: 提案書送付", "type": "main", "index": 0 }]] }
+  }
+}

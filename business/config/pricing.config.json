@@ -1,0 +1,64 @@
+{
+  "currency": "JPY",
+  "services": [
+    {
+      "id": "instagram-diagnosis",
+      "name": "Instagram/SNS診断パッケージ",
+      "type": "one_time",
+      "price": 50000,
+      "target_margin": 0.85,
+      "delivery_hours": 24,
+      "ai_automation_rate": 0.95
+    },
+    {
+      "id": "sns-management",
+      "name": "SNS運用丸ごと代行",
+      "type": "monthly",
+      "price": 100000,
+      "target_margin": 0.75,
+      "min_contract_months": 3,
+      "ai_automation_rate": 0.9
+    },
+    {
+      "id": "ec-diagnosis",
+      "name": "EC診断＋CVR改善提案",
+      "type": "one_time_or_monthly",
+      "price_one_time": 80000,
+      "price_monthly": 120000,
+      "target_margin": 0.8,
+      "delivery_hours": 24,
+      "ai_automation_rate": 0.9
+    },
+    {
+      "id": "lp-production",
+      "name": "LP制作",
+      "type": "one_time",
+      "price": 150000,
+      "target_margin": 0.7,
+      "delivery_hours": 24,
+      "ai_automation_rate": 0.9
+    },
+    {
+      "id": "ai-brand-advisor",
+      "name": "AIブランド顧問サブスク",
+      "type": "monthly",
+      "price": 300000,
+      "target_margin": 0.75,
+      "min_contract_months": 6,
+      "ai_automation_rate": 0.85
+    }
+  ],
+  "guardrails": {
+    "min_one_time_price": 50000,
+    "min_monthly_price": 100000,
+    "min_ai_automation_rate": 0.9,
+    "max_delivery_hours": 24,
+    "min_margin": 0.5,
+    "target_margin": 0.7
+  },
+  "cost_assumptions": {
+    "claude_api_cost_per_report_jpy": 150,
+    "avg_human_review_hours_per_report": 0.5,
+    "human_hourly_cost_jpy": 4000
+  }
+}
