@@ -16,6 +16,7 @@
 LP制作・AIブランド顧問へとアップセルする事業を、AI自動化率90%以上で運営するための一式。
 
 **今すぐやることは [`business/docs/TOMORROW_MORNING.md`](business/docs/TOMORROW_MORNING.md) を参照。**
+**実際に案件を回す実務手順は [`business/docs/OPERATIONS_GUIDE.md`](business/docs/OPERATIONS_GUIDE.md) を参照。**
 
 ### クイックスタート
 ```bash

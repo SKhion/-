@@ -4,7 +4,9 @@ Shionの会社をAIだけで成長させるための事業インフラ一式。�
 月次レポート・契約更新・アップセルまでを、Claude(Anthropic API)を中核にしたエージェント群と
 自動化スクリプトで一気通貫に回すことを目的とする。
 
-**まず読むべきドキュメント**: [`docs/TOMORROW_MORNING.md`](docs/TOMORROW_MORNING.md)（今すぐやることの優先順位）
+**まず読むべきドキュメント**:
+- [`docs/TOMORROW_MORNING.md`](docs/TOMORROW_MORNING.md)（今すぐやることの優先順位）
+- [`docs/OPERATIONS_GUIDE.md`](docs/OPERATIONS_GUIDE.md)（実務ベースの運用マニュアル。1案件をどのコマンドで回すか、週次ルーティン、詰まりどころまで）
 
 ## 全体像
 - 戦略: [`docs/00_ANALYSIS.md`](docs/00_ANALYSIS.md)（既存プロジェクト解析）/
